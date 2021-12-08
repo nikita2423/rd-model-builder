@@ -4,6 +4,7 @@ import {
   NodeModel,
 } from "@projectstorm/react-diagrams";
 import { BaseModelOptions } from "@projectstorm/react-canvas-core";
+import { SmartPortModel } from "../SmartLink/SmartPortModel";
 
 export class ErdNodeModel extends NodeModel {
   color;
@@ -22,13 +23,13 @@ export class ErdNodeModel extends NodeModel {
 
     for (let i of this.table) {
       this.addPort(
-        new DefaultPortModel({
+        new SmartPortModel({
           in: true,
           name: i.name,
         })
       );
       this.addPort(
-        new DefaultPortModel({
+        new SmartPortModel({
           in: false,
           name: i.name + "_out",
         })

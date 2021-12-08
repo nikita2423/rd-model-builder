@@ -14,6 +14,15 @@ export const CanvasApp = (props) => {
 
   const diagramEngine = props.engine;
 
+  // for stopping the screen zooming
+  const scrollRef = useRef(null);
+  useEffect(() => {
+    const scrollEl = scrollRef.current;
+    scrollEl?.addEventListener("wheel", stopScroll);
+    return () => scrollEl?.removeEventListener("wheel", stopScroll);
+  }, []);
+  const stopScroll = (e) => e.preventDefault();
+
   const onNodeDrop = (event) => {
     console.log(
       "On Node Drop",
@@ -46,13 +55,6 @@ export const CanvasApp = (props) => {
   };
 
   // console.log("Engine", props.engine.getModel().getNodes());
-  const scrollRef = useRef(null);
-  useEffect(() => {
-    const scrollEl = scrollRef.current;
-    scrollEl?.addEventListener("wheel", stopScroll);
-    return () => scrollEl?.removeEventListener("wheel", stopScroll);
-  }, []);
-  const stopScroll = (e) => e.preventDefault();
 
   return (
     <div className="creator-body" ref={scrollRef} onMouseUp={props.onMouseUp}>

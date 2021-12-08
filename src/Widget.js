@@ -2,8 +2,12 @@ import React from "react";
 import createEngine, {
   DiagramModel,
   PortModelAlignment,
+  DragNewLinkState,
+  PortModel,
   //   RightAngleLinkFactory,
 } from "@projectstorm/react-diagrams";
+
+import { Action, InputType } from "@projectstorm/react-canvas-core";
 
 import {
   RightAngleLinkFactory,
@@ -18,6 +22,12 @@ import { DiamondNodeFactory } from "./components/DiamondNode/DiamondNodeFactory"
 import { SimplePortFactory } from "./components/DiamondNode/SimplePortFactory";
 import { DiamondPortModel } from "./components/DiamondNode/DiamondPortModel";
 import { ErdFactory } from "./components/ErdNode/ErdNodeFactory";
+import { SmartLinkFactory } from "./components/SmartLink/SmartLinkFactory";
+
+const config = {
+  allowLooseLinks: true,
+  allowLinksFromLockedPorts: true,
+};
 
 function MyDiagram() {
   // force update canvas
@@ -51,7 +61,12 @@ function MyDiagram() {
         });
     },
     eventDidFire: () => {
-      // console.log("Event Did fire");
+      console.log("Event Did fire");
+      const serializedData = engine.getModel().serialize();
+      localStorage.setItem(
+        "React-diagram-example",
+        JSON.stringify(serializedData)
+      );
     },
     gridUpdated: () => {
       // console.log("Grid Updated");
@@ -59,6 +74,25 @@ function MyDiagram() {
     linksUpdated: (e) => {
       console.log("On Link updated");
       linkRef = e;
+      const links = engine
+        .getModel()
+        .getLinks()
+        .map((linkModel) => {
+          linkModel.registerListener({
+            sourcePortChanged: () => {
+              console.log("Link Source Port chnaged");
+            },
+            targetPortChanged: () => {
+              console.log("Link Target Port chnaged");
+            },
+            selectionChanged: (e) => {
+              console.log("Link selectionChanged");
+            },
+            entityRemoved: () => {
+              console.log("Link entity Removed");
+            },
+          });
+        });
       const serializedData = engine.getModel().serialize();
       localStorage.setItem(
         "React-diagram-example",
@@ -72,11 +106,8 @@ function MyDiagram() {
     if (linkRef.link) {
       const link = linkRef.link;
       if (link.sourcePort !== null && link.targetPort !== null) {
-        console.log("Source Port", link?.sourcePort);
-        console.log("Target Port", link?.targetPort);
-
         const serializedData = engine.getModel().serialize();
-        console.log("Serailized Data", serializedData);
+
         localStorage.setItem(
           "React-diagram-example",
           JSON.stringify(serializedData)
@@ -116,15 +147,45 @@ function MyDiagram() {
     );
   engine.getNodeFactories().registerFactory(new DiamondNodeFactory());
   engine.getNodeFactories().registerFactory(new ErdFactory());
-  console.log(
-    "New Diagram",
-    JSON.parse(localStorage.getItem("React-diagram-example"))
+  engine.getLinkFactories().registerListener(new SmartLinkFactory());
+  const state = new DragNewLinkState();
+  // state.fireMouseMoved(() => {
+  //   console.log("First Mouse moved");
+  // });
+  state.registerAction(
+    new Action({
+      type: InputType.MOUSE_DOWN,
+      fire: (event) => {
+        console.log("I am getting called");
+        // let port = engine.getMouseElement(event.event);
+        // if (!config.allowLinksFromLockedPorts && port.isLocked()) {
+        //   state.eject();
+        //   return;
+        // }
+        // let link = port.createLinkModel();
+
+        // // if no link is given, just eject the state
+        // if (!link) {
+        //   state.eject();
+        //   return;
+        // }
+        // link.setSelected(true);
+        // link.setSourcePort(port);
+        // engine.getModel().addLink(link);
+        // port.reportPosition();
+      },
+    })
   );
-  model.deserializeModel(
-    JSON.parse(localStorage.getItem("React-diagram-example")),
-    engine
-  );
-  console.log("Model", model);
+  engine.getStateMachine().pushState(state);
+  // console.log(
+  //   "New Diagram",
+  //   JSON.parse(localStorage.getItem("React-diagram-example"))
+  // );
+  // model.deserializeModel(
+  //   JSON.parse(localStorage.getItem("React-diagram-example")),
+  //   engine
+  // );
+  // console.log("Model", model);
   engine.setModel(model);
 
   return <CanvasApp engine={engine} onMouseUp={onMouseUp} />;

@@ -5,14 +5,14 @@ import {
   PortModelAlignment,
 } from "@projectstorm/react-diagrams";
 
-import { SmartLinkFactory } from "../SmartLink/SmartLinkFactory";
+import { SmartLinkFactory } from "./SmartLinkFactory";
 
-export class DiamondPortModel extends PortModel {
-  constructor(alignment) {
+export class SmartPortModel extends PortModel {
+  constructor(options) {
     super({
-      type: "diamond",
-      name: alignment,
-      alignment: alignment,
+      type: "smart-link",
+      in: options.in,
+      name: options.name,
     });
   }
 

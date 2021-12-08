@@ -5,6 +5,7 @@ import {
 } from "@projectstorm/react-diagrams";
 
 import { RightAnglePortModel } from "../RightAnglePortModel";
+import { SmartPortModel } from "../SmartLink/SmartPortModel";
 
 // export interface NodeModelOptions extends BaseModelOptions {
 //   color?: string;
@@ -38,13 +39,13 @@ export class NodeModel extends StormNodeModel {
 
     // setup an in and out port
     this.addPort(
-      new DefaultPortModel({
+      new SmartPortModel({
         in: true,
         name: "in",
       })
     );
     this.addPort(
-      new DefaultPortModel({
+      new SmartPortModel({
         in: false,
         name: "out",
       })
