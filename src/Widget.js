@@ -18,16 +18,17 @@ import { DiamondNodeFactory } from "./components/DiamondNode/DiamondNodeFactory"
 import { SimplePortFactory } from "./components/DiamondNode/SimplePortFactory";
 import { DiamondPortModel } from "./components/DiamondNode/DiamondPortModel";
 import { ErdFactory } from "./components/ErdNode/ErdNodeFactory";
+
 function MyDiagram() {
   // force update canvas
   const forceUpdate = React.useReducer((bool) => !bool)[1];
-  const engine = createEngine({ registerDefaultZoomCanvasAction: false });
+  const engine = createEngine();
   const model = new DiagramModel();
   // engine.setModel(model);
-
+  let linkRef = React.useRef();
   model.registerListener({
     nodesUpdated: () => {
-      console.log("Nodes updated");
+      // console.log("Nodes updated");
       const serializedData = engine.getModel().serialize();
       localStorage.setItem(
         "React-diagram-example",
@@ -44,19 +45,20 @@ function MyDiagram() {
                 "React-diagram-example",
                 JSON.stringify(serializedData)
               );
-              console.log("Serialized Data", serializedData);
+              // console.log("Serialized Data", serializedData);
             },
           });
         });
     },
     eventDidFire: () => {
-      console.log("Event Did fire");
+      // console.log("Event Did fire");
     },
     gridUpdated: () => {
-      console.log("Grid Updated");
+      // console.log("Grid Updated");
     },
-    linksUpdated: () => {
+    linksUpdated: (e) => {
       console.log("On Link updated");
+      linkRef = e;
       const serializedData = engine.getModel().serialize();
       localStorage.setItem(
         "React-diagram-example",
@@ -65,6 +67,24 @@ function MyDiagram() {
       //   engine.getLinks
     },
   });
+
+  const onMouseUp = (event) => {
+    if (linkRef.link) {
+      const link = linkRef.link;
+      if (link.sourcePort !== null && link.targetPort !== null) {
+        console.log("Source Port", link?.sourcePort);
+        console.log("Target Port", link?.targetPort);
+
+        const serializedData = engine.getModel().serialize();
+        console.log("Serailized Data", serializedData);
+        localStorage.setItem(
+          "React-diagram-example",
+          JSON.stringify(serializedData)
+        );
+      }
+      linkRef.current = null;
+    }
+  };
 
   const models = model.getModels();
   models.forEach((item) => {
@@ -100,14 +120,14 @@ function MyDiagram() {
     "New Diagram",
     JSON.parse(localStorage.getItem("React-diagram-example"))
   );
-  // model.deserializeModel(
-  //   JSON.parse(localStorage.getItem("React-diagram-example")),
-  //   engine
-  // );
-  // console.log("Model", model);
+  model.deserializeModel(
+    JSON.parse(localStorage.getItem("React-diagram-example")),
+    engine
+  );
+  console.log("Model", model);
   engine.setModel(model);
 
-  return <CanvasApp engine={engine} />;
+  return <CanvasApp engine={engine} onMouseUp={onMouseUp} />;
 }
 
 export default MyDiagram;

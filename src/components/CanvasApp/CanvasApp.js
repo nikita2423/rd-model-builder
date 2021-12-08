@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { CanvasWidget } from "@projectstorm/react-canvas-core";
 // import { NodesTypesContainer } from "../nodes-types-container/NodesTypesContainer";
 import { NodeTypeLabel } from "../NodeTypes/NodeTypes";
@@ -45,10 +45,17 @@ export const CanvasApp = (props) => {
     forceUpdate();
   };
 
-  console.log("Engine", props.engine.getModel().getNodes());
+  // console.log("Engine", props.engine.getModel().getNodes());
+  const scrollRef = useRef(null);
+  useEffect(() => {
+    const scrollEl = scrollRef.current;
+    scrollEl?.addEventListener("wheel", stopScroll);
+    return () => scrollEl?.removeEventListener("wheel", stopScroll);
+  }, []);
+  const stopScroll = (e) => e.preventDefault();
 
   return (
-    <div className="creator-body">
+    <div className="creator-body" ref={scrollRef} onMouseUp={props.onMouseUp}>
       <header className="creator-header"></header>
 
       <div className="creator-content">
